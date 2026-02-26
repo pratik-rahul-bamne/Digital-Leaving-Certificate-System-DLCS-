@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}DLCS{% endblock %} — Digital Leaving Certificate System</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body class="bg-light">
+  <!-- Wrapper -->
+  <div class="d-flex" id="wrapper">
+
+    {% if session.admin_id %}
+    <!-- Sidebar (Admin) -->
+    <div class="sidebar bg-primary text-white" id="sidebar-wrapper">
+      <div class="sidebar-heading text-center py-4 fs-4 fw-bold border-bottom border-light border-opacity-25">
+        <i class="bi bi-mortarboard-fill me-2"></i>DLCS Admin
+      </div>
+      <div class="list-group list-group-flush my-3">
+        <a href="{{ url_for('dashboard') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white {% if request.endpoint == 'dashboard' %}active-nav{% endif %}"><i
+            class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+        <a href="{{ url_for('students_add') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white {% if request.endpoint == 'students_add' %}active-nav{% endif %}"><i
+            class="bi bi-person-plus me-2"></i>Add Student</a>
+        <a href="{{ url_for('students_list') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white {% if 'student' in request.endpoint and request.endpoint != 'students_add' %}active-nav{% endif %}"><i
+            class="bi bi-people me-2"></i>Students</a>
+        <a href="{{ url_for('certificates_list') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white {% if 'certificate' in request.endpoint %}active-nav{% endif %}"><i
+            class="bi bi-file-earmark-text me-2"></i>Certificates</a>
+        <a href="{{ url_for('requests_list') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white {% if 'request' in request.endpoint %}active-nav{% endif %}"><i
+            class="bi bi-inbox me-2"></i>LC Requests</a>
+        <a href="{{ url_for('registrations_list') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white {% if 'registration' in request.endpoint %}active-nav{% endif %}"><i
+            class="bi bi-card-checklist me-2"></i>Registrations</a>
+        <a href="{{ url_for('logout') }}"
+          class="list-group-item list-group-item-action bg-transparent text-white mt-auto border-top border-light border-opacity-25"><i
+            class="bi bi-box-arrow-right me-2"></i>Logout</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper" class="w-100">
+
+      {% if session.admin_id or session.student_user_id %}
+      <!-- Top Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm py-3">
+        <div class="container-fluid px-4">
+          {% if session.admin_id %}
+          <button class="btn btn-outline-primary shadow-sm" id="sidebarToggle" aria-label="Toggle navigation">
+            <i class="bi bi-list" style="font-size: 1.25rem;"></i>
+          </button>
+          <span class="navbar-brand ms-3 fw-bold text-primary d-none d-md-block">Digital Leaving Certificate System
+            (DLCS)</span>
+          {% elif session.student_user_id %}
+          <span class="navbar-brand fw-bold text-primary"><i class="bi bi-mortarboard-fill me-2"></i>Student
+            Portal</span>
+          {% endif %}
+
+          <div class="ms-auto d-flex align-items-center">
+            {% if session.admin_id %}
+            <div class="dropdown">
+              <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="bi bi-person-circle fs-5 me-1 text-primary align-middle"></i>
+                {{ session.admin_username }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i
+                      class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+              </ul>
+            </div>
+            {% elif session.student_user_id %}
+            <span class="badge bg-info text-dark rounded-pill me-3 px-3 py-2">Student</span>
+            <a href="{{ url_for('student_logout') }}" class="btn btn-sm btn-outline-danger"><i
+                class="bi bi-box-arrow-right me-1"></i>Logout</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+      {% endif %}
+
+      <!-- Flash Messages -->
+      <div class="container-fluid px-4 mt-3" style="position: relative;">
+        <div class="flash-container">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          {% set bs_cat = 'success' %}
+          {% if category == 'danger' %}{% set bs_cat = 'danger' %}{% endif %}
+          {% if category == 'warning' %}{% set bs_cat = 'warning' %}{% endif %}
+          {% if category == 'info' %}{% set bs_cat = 'info' %}{% endif %}
+          <div
+            class="alert alert-{{ bs_cat }} alert-dismissible fade show shadow-sm border-0 border-start border-4 border-{{ bs_cat }}"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main
+        class="container-fluid px-4 pb-5 pt-3 {% if not session.admin_id and not session.student_user_id %}d-flex justify-content-center align-items-center min-vh-100{% endif %}">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Toggle Sidebar
+    document.addEventListener("DOMContentLoaded", function (event) {
+      // Check local storage for sidebar state
+      const sidebarState = localStorage.getItem('sb|sidebar-toggle');
+      if (sidebarState === 'true') {
+        document.body.classList.add('sb-sidenav-toggled');
+      }
+
+      const sidebarToggle = document.body.querySelector('#sidebarToggle');
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', event => {
+          event.preventDefault();
+          document.body.classList.toggle('sb-sidenav-toggled');
+          localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sb-sidenav-toggled'));
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

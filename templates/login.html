@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100" style="margin-top: -80px;">
+    <div class="card card-soft border-0 shadow-lg p-4" style="max-width: 450px; width: 100%;">
+        <div class="text-center mb-4">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 80px; height: 80px;">
+                <i class="bi bi-mortarboard-fill fs-1"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-1">DLCS Admin</h2>
+            <p class="text-muted-custom">Digital Leaving Certificate System</p>
+        </div>
+
+        <form method="POST" id="loginForm" novalidate>
+            <div class="mb-3">
+                <label for="username" class="form-label fw-semibold text-muted-custom">Username</label>
+                <input type="text" id="username" name="username" class="form-control form-control-lg"
+                    placeholder="Enter your username" required autocomplete="username"
+                    value="{{ request.form.get('username', '') }}" />
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label fw-semibold text-muted-custom">Password</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" class="form-control form-control-lg"
+                        placeholder="Enter your password" required autocomplete="current-password" />
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('password', this)"><i
+                            class="bi bi-eye"></i></button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" id="loginBtn">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function togglePwd(id, btn) {
+        const pwd = document.getElementById(id);
+        const icon = btn.querySelector('i');
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            pwd.type = "password";
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+</script>
+{% endblock %}

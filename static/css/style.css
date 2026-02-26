@@ -1,0 +1,280 @@
+/* =====================================================================
+   College LC System — Global Stylesheet (Bootstrap 5 Admin Theme)
+   Primary: #1E3A8A (Deep Blue), Secondary: #2563EB, BG: #F8FAFC
+   ===================================================================== */
+
+:root {
+  --bs-primary: #1E3A8A;
+  --bs-primary-rgb: 30, 58, 138;
+  --bs-secondary: #2563EB;
+  --bs-body-bg: #F8FAFC;
+  --bs-font-sans-serif: 'Inter', sans-serif;
+  --sidebar-width: 260px;
+}
+
+body {
+  font-family: var(--bs-font-sans-serif);
+  background-color: var(--bs-body-bg);
+  color: #334155;
+  overflow-x: hidden;
+}
+
+/* ── Typography ──────────────────────────────────────────────────────── */
+.page-title {
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.2rem;
+  font-size: 1.75rem;
+}
+
+.page-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+/* ── Sidebar Layout ─────────────────────────────────────────────────── */
+#wrapper {
+  overflow-x: hidden;
+  transition: margin 0.25s ease-out;
+}
+
+#sidebar-wrapper {
+  min-height: 100vh;
+  width: var(--sidebar-width);
+  margin-left: -var(--sidebar-width);
+  transition: margin 0.25s ease-out;
+  background-color: var(--bs-primary) !important;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+  z-index: 1040;
+}
+
+#sidebar-wrapper .sidebar-heading {
+  padding: 1.5rem 1rem;
+}
+
+#sidebar-wrapper .list-group-item {
+  border: none;
+  padding: 0.85rem 1.5rem;
+  font-weight: 500;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+  color: #e2e8f0 !important;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transform: translateX(4px);
+  color: #ffffff !important;
+}
+
+#sidebar-wrapper .active-nav {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-left: 4px solid #fff !important;
+  color: #ffffff !important;
+}
+
+#page-content-wrapper {
+  min-width: 100vw;
+  transition: min-width 0.25s ease-out;
+}
+
+body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
+  margin-left: 0;
+}
+
+@media (min-width: 768px) {
+  #sidebar-wrapper {
+    margin-left: 0;
+  }
+
+  #page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
+    margin-left: -var(--sidebar-width);
+  }
+}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card-soft {
+  background: #ffffff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.card-soft:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+.card-header-soft {
+  background: transparent;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1.25rem 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+/* ── Form Styling ───────────────────────────────────────────────────── */
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border-color: #cbd5e1;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  color: #1e293b;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bs-secondary);
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15);
+}
+
+.form-floating>label {
+  color: #64748b;
+  padding-left: 1rem;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+.btn {
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+  background-color: #172b68;
+  border-color: #172b68;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+}
+
+.btn-secondary-custom {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  color: white;
+}
+
+.btn-secondary-custom:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────── */
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.table th {
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  border-bottom-width: 1px;
+}
+
+.table td {
+  vertical-align: middle;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+/* ── Flash Messages ─────────────────────────────────────────────────── */
+.flash-container {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 1050;
+  max-width: 400px;
+}
+
+/* ── Custom Utilities ────────────────────────────────────────────────── */
+.text-muted-custom {
+  color: #64748b !important;
+}
+
+.bg-light-soft {
+  background-color: #f1f5f9 !important;
+}
+
+/* ── Step Indicator ─────────────────────────────────────────────────── */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.step-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e2e8f0;
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.step-item {
+  position: relative;
+  z-index: 2;
+  background: var(--bs-body-bg);
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.step-item.active .step-circle {
+  background: var(--bs-primary);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
+}
+
+.step-item.active .step-label {
+  color: var(--bs-primary);
+  font-weight: 600;
+}

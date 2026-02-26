@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+{% block title %}Edit — {{ student.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">Edit Student</h1>
+        <p class="page-subtitle text-muted-custom">Updating record for <strong class="text-dark">{{ student.name
+                }}</strong></p>
+    </div>
+    <a href="{{ url_for('students_view', student_id=student.student_id) }}"
+        class="btn btn-secondary-custom shadow-sm"><i class="bi bi-arrow-left me-2"></i>Back to Profile</a>
+</div>
+
+<!-- Step Indicator -->
+<div class="card card-soft mb-4">
+    <div class="card-body py-4">
+        <div class="step-indicator">
+            <div class="step-item active">
+                <div class="step-circle">1</div>
+                <div class="step-label">Personal</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">2</div>
+                <div class="step-label">Academic</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">3</div>
+                <div class="step-label">Admission</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">4</div>
+                <div class="step-label">Gap Year</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">5</div>
+                <div class="step-label">Contact</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="POST" id="studentForm" enctype="multipart/form-data" novalidate>
+    <div class="row g-4">
+        <!-- Card 1: Personal Details -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step1">
+                <div class="card-header card-header-soft"><i class="bi bi-person me-2 text-primary"></i>Personal Details
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Full Name</label>
+                            <input type="text" name="name" class="form-control" required value="{{ student.name }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Father's Name</label>
+                            <input type="text" name="father_name" class="form-control" required
+                                value="{{ student.father_name }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Mother's Name</label>
+                            <input type="text" name="mother_name" class="form-control"
+                                value="{{ student.mother_name or '' }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">— Select —</option>
+                                {% for g in ['Male', 'Female', 'Other'] %}
+                                <option value="{{ g }}" {% if student.gender==g %}selected{% endif %}>{{ g }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted-custom required">Date of Birth</label>
+                            {% set dob_str = student.dob|string %}
+                            {% set dob_parts = dob_str.split('-') %}
+                            {% set d_year = dob_parts[0] if dob_parts|length == 3 else '' %}
+                            {% set d_month = dob_parts[1] if dob_parts|length == 3 else '' %}
+                            {% set d_date = dob_parts[2] if dob_parts|length == 3 else '' %}
+                            <div class="row g-2">
+                                <div class="col">
+                                    <select name="dob_date" class="form-select" required>
+                                        <option value="">Date</option>
+                                        {% for d in range(1, 32) %}
+                                        {% set dval = '%02d' % d %}
+                                        <option value="{{ dval }}" {% if d_date==dval %}selected{% endif %}>{{ dval }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select name="dob_month" class="form-select" required>
+                                        <option value="">Month</option>
+                                        {% for m, name in
+                                        [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),(7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')]
+                                        %}
+                                        {% set mval = '%02d' % m %}
+                                        <option value="{{ mval }}" {% if d_month==mval %}selected{% endif %}>{{ name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select name="dob_year" class="form-select" required>
+                                        <option value="">Year</option>
+                                        {% for y in range(1980, 2026)|reverse %}
+                                        <option value="{{ y }}" {% if d_year==y|string %}selected{% endif %}>{{ y }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Academic Information -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step2">
+                <div class="card-header card-header-soft"><i class="bi bi-book me-2 text-primary"></i>Academic
+                    Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Course</label>
+                            <select name="course" class="form-select" required>
+                                <option value="">— Select Course —</option>
+                                <option value="B.Tech" {% if student.course=='B.Tech' %}selected{% endif %}>B.Tech
+                                </option>
+                                <option value="MCA" {% if student.course=='MCA' %}selected{% endif %}>MCA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Department</label>
+                            {% set standard_depts = ['CSE', 'IT', 'AI & DS', 'E&TC', 'MECH', 'CIVIL'] %}
+                            {% set is_other = student.department not in standard_depts and student.department %}
+                            <select name="department" id="department" class="form-select" required
+                                onchange="toggleOtherDept()">
+                                <option value="">— Select Department —</option>
+                                {% for d in standard_depts %}
+                                <option value="{{ d }}" {% if student.department==d %}selected{% endif %}>{{ d }}
+                                </option>
+                                {% endfor %}
+                                <option value="Other" {% if is_other %}selected{% endif %}>Other</option>
+                            </select>
+                            <input type="text" name="other_department" id="other_department" class="form-control mt-2"
+                                placeholder="Specify Department"
+                                style="display:{% if is_other %}block{% else %}none{% endif %};"
+                                value="{% if is_other %}{{ student.department }}{% endif %}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Admission & Passing Details -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step3">
+                <div class="card-header card-header-soft"><i
+                        class="bi bi-calendar-check me-2 text-primary"></i>Admission & Passing Details</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Year of Admission</label>
+                            <input type="number" name="admission_year" id="admission_year" class="form-control" required
+                                value="{{ student.admission_year }}" onchange="calculatePassingYear()" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Admission Type</label>
+                            <select name="admission_type" id="admission_type" class="form-select" required
+                                onchange="calculatePassingYear()">
+                                <option value="First Year" {% if student.admission_type=='First Year' or not
+                                    student.admission_type %}selected{% endif %}>First Year</option>
+                                <option value="Direct Second Year" {% if student.admission_type=='Direct Second Year'
+                                    %}selected{% endif %}>Direct Second Year</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Passing Year</label>
+                            <input type="number" name="passing_year" id="passing_year" class="form-control bg-light"
+                                readonly required value="{{ student.passing_year or '' }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Year of Leaving</label>
+                            <input type="number" name="leaving_year" class="form-control" required
+                                value="{{ student.leaving_year }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Date of Leaving</label>
+                            <input type="date" name="leaving_date" class="form-control"
+                                value="{{ student.leaving_date or '' }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Conduct</label>
+                            <select name="conduct" class="form-select">
+                                {% for c in ['Good', 'Excellent', 'Satisfactory', 'Below Average'] %}
+                                <option value="{{ c }}" {% if student.conduct==c %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Academic Status</label>
+                            <select name="academic_status" class="form-select">
+                                {% for a in ['Regular', 'Pass', 'Fail', 'Detained', 'Rusticated'] %}
+                                <option value="{{ a }}" {% if student.academic_status==a %}selected{% endif %}>{{ a }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold text-muted-custom">Reason for Leaving</label>
+                            <textarea name="reason_for_leaving" class="form-control"
+                                rows="2">{{ student.reason_for_leaving or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Gap Year -->
+        <div class="col-12">
+            <div class="card card-soft h-100 border-warning border-opacity-25" id="step4">
+                <div class="card-header card-header-soft bg-warning bg-opacity-10 text-dark"><i
+                        class="bi bi-hourglass-split me-2 text-warning"></i>Gap Year Information</div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" name="gap_year_applicable"
+                            id="gap_year_applicable" value="1" onchange="toggleGapYear()" {% if
+                            student.gap_year_applicable %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold text-muted-custom ms-2" for="gap_year_applicable">Gap
+                            Year Applicable</label>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6" id="gap_years_group"
+                            style="display:{% if student.gap_year_applicable %}block{% else %}none{% endif %};">
+                            <label class="form-label fw-semibold text-muted-custom required">Number of Gap Years</label>
+                            <input type="number" name="gap_years" id="gap_years" class="form-control" min="1"
+                                value="{{ student.gap_years if student.gap_years else '' }}" />
+                        </div>
+                        <div class="col-md-6" id="gap_certificate_group"
+                            style="display:{% if student.gap_year_applicable %}block{% else %}none{% endif %};">
+                            <label class="form-label fw-semibold text-muted-custom required">Gap Certificate
+                                (PDF/JPG/PNG, Max 2MB)</label>
+                            {% if student.gap_certificate_path %}
+                            <div style="margin-bottom: 0.5rem; font-size: 0.9rem;" class="text-primary"><i
+                                    class="bi bi-file-earmark-check me-1"></i>Current: <a
+                                    href="{{ url_for('static', filename=student.gap_certificate_path) }}"
+                                    target="_blank" class="fw-bold">View File</a> (Upload new to replace)</div>
+                            {% endif %}
+                            <input type="file" name="gap_certificate" id="gap_certificate" class="form-control"
+                                accept=".pdf,.jpg,.jpeg,.png" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5: Contact Information -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step5">
+                <div class="card-header card-header-soft"><i
+                        class="bi bi-person-lines-fill me-2 text-primary"></i>Contact Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Email Address</label>
+                            <input type="email" name="email" class="form-control" required
+                                value="{{ student.email or '' }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Phone</label>
+                            <input type="tel" name="phone" class="form-control" pattern="^\d{10}$" required
+                                value="{{ student.phone or '' }}" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted-custom">Address</label>
+                            <textarea name="address" class="form-control"
+                                rows="2">{{ student.address or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-soft mt-3 bg-light border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="text-muted-custom small"><i class="bi bi-info-circle me-1"></i>Ensure all required fields
+                marked with * are filled.</span>
+            <div>
+                <a href="{{ url_for('students_view', student_id=student.student_id) }}"
+                    class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-2"></i>Save Changes</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function calculatePassingYear() {
+        const adminYear = parseInt(document.getElementById('admission_year').value);
+        const adminType = document.getElementById('admission_type').value;
+        const passingYearInput = document.getElementById('passing_year');
+        if (adminYear) {
+            if (adminType === 'First Year') {
+                passingYearInput.value = adminYear + 4;
+            } else if (adminType === 'Direct Second Year') {
+                passingYearInput.value = adminYear + 3;
+            }
+        } else {
+            passingYearInput.value = '';
+        }
+    }
+
+    function toggleGapYear() {
+        const isChecked = document.getElementById('gap_year_applicable').checked;
+        const gapYearsGroup = document.getElementById('gap_years_group');
+        const gapCertGroup = document.getElementById('gap_certificate_group');
+        const gapYears = document.getElementById('gap_years');
+        const gapCert = document.getElementById('gap_certificate');
+        const hasExistingCert = {{ 'true' if student.gap_certificate_path else 'false' }};
+
+    if (isChecked) {
+        gapYearsGroup.style.display = 'block';
+        gapCertGroup.style.display = 'block';
+        gapYears.required = true;
+        if (!hasExistingCert) gapCert.required = true;
+    } else {
+        gapYearsGroup.style.display = 'none';
+        gapCertGroup.style.display = 'none';
+        gapYears.required = false;
+        gapCert.required = false;
+    }
+    }
+
+    function toggleOtherDept() {
+        const dept = document.getElementById('department').value;
+        const otherDept = document.getElementById('other_department');
+        if (dept === 'Other') {
+            otherDept.style.display = 'block';
+            otherDept.required = true;
+        } else {
+            otherDept.style.display = 'none';
+            otherDept.required = false;
+            otherDept.value = '';
+        }
+    }
+
+    // Scroll Spy for Step Indicator
+    const sections = ['step1', 'step2', 'step3', 'step4', 'step5'];
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const el = document.getElementById(section);
+            if (el) {
+                const sectionTop = el.offsetTop - 150;
+                if (pageYOffset >= sectionTop) {
+                    current = section;
+                }
+            }
+        });
+
+        const stepItems = document.querySelectorAll('.step-item');
+        stepItems.forEach((item, index) => {
+            if (current === `step${index + 1}`) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        if (pageYOffset < 100) {
+            stepItems.forEach(i => i.classList.remove('active'));
+            stepItems[0].classList.add('active');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const passingYearInput = document.getElementById('passing_year');
+        if (!passingYearInput.value) {
+            calculatePassingYear();
+        }
+
+        const gapCert = document.getElementById('gap_certificate');
+        if (gapCert) {
+            gapCert.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file && file.size > 2 * 1024 * 1024) {
+                    alert("File size exceeds 2 MB");
+                    this.value = '';
+                }
+            });
+        }
+    });
+</script>
+<style>
+    .required::after {
+        content: ' *';
+        color: #ef4444;
+    }
+</style>
+{% endblock %}

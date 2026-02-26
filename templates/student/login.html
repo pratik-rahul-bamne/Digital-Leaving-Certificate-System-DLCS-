@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Student Login{% endblock %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100" style="margin-top: -80px;">
+    <div class="card card-soft border-0 shadow-lg p-4" style="max-width: 450px; width: 100%;">
+        <div class="text-center mb-4 mt-2">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 80px; height: 80px;">
+                <i class="bi bi-person-badge-fill fs-1"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-1">DLCS Student Portal</h2>
+            <p class="text-muted-custom">Log in to view your LC status and download your digital certificate</p>
+        </div>
+
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label for="username" class="form-label fw-semibold text-muted-custom">Student Username</label>
+                <input type="text" id="username" name="username" class="form-control form-control-lg"
+                    placeholder="e.g. stu0001" required autocomplete="username"
+                    value="{{ request.form.get('username', '') }}" />
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label fw-semibold text-muted-custom">Password</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" class="form-control form-control-lg"
+                        placeholder="Your password" required />
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('password', this)"><i
+                            class="bi bi-eye"></i></button>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+                <a href="{{ url_for('student_register') }}" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-pencil-square me-2"></i>New Student? Register Here
+                </a>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('login') }}" class="text-decoration-none text-muted-custom small"><i
+                        class="bi bi-shield-lock me-1"></i>Admin Login</a>
+            </div>
+        </form>
+
+        <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info mt-4 mb-0 small rounded-3">
+            <i class="bi bi-info-circle-fill me-2"></i><strong>Hint:</strong> Your username was provided by the college
+            admin. Default password is your date of birth without dashes (e.g. <code>20020615</code>).
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePwd(id, btn) {
+        const pwd = document.getElementById(id);
+        const icon = btn.querySelector('i');
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            pwd.type = "password";
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+</script>
+{% endblock %}

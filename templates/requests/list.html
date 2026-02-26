@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}LC Requests{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">LC Requests</h1>
+        <p class="page-subtitle text-muted-custom">
+            Student-submitted leaving certificate requests
+            {% set pending = reqs | selectattr('status','eq','pending') | list | length %}
+            {% if pending > 0 %}
+            <span class="badge bg-warning text-dark ms-2">{{ pending }} pending</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+{% if reqs %}
+<div class="card card-soft">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light-soft">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Student Name</th>
+                        <th>Course & Dept</th>
+                        <th>Submitted</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reqs %}
+                    <tr>
+                        <td class="ps-4 text-muted-custom fw-medium">#{{ r.request_id }}</td>
+                        <td>
+                            <a href="{{ url_for('students_view', student_id=r.student_id) }}"
+                                class="fw-bold text-dark text-decoration-none hover-text-primary">
+                                {{ r.student_name }}
+                            </a>
+                        </td>
+                        <td>
+                            <div><span class="badge bg-primary bg-opacity-10 text-primary">{{ r.course }}</span></div>
+                            <div class="small text-muted-custom mt-1">{{ r.department }}</div>
+                        </td>
+                        <td>{{ r.created_at[:10] if r.created_at else '—' }}</td>
+                        <td style="max-width:200px" class="text-truncate" title="{{ r.reason }}">{{ r.reason or '—' }}
+                        </td>
+                        <td>
+                            {% if r.status == 'pending' %}
+                            <span
+                                class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1"><i
+                                    class="bi bi-hourglass-split me-1"></i>Pending</span>
+                            {% elif r.status == 'approved' %}
+                            <span
+                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i
+                                    class="bi bi-check-circle-fill me-1"></i>Approved</span>
+                            {% else %}
+                            <span
+                                class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1"><i
+                                    class="bi bi-x-circle-fill me-1"></i>Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            {% if r.status == 'pending' %}
+                            <div class="d-flex justify-content-end gap-2">
+                                <form method="POST" action="{{ url_for('requests_approve', request_id=r.request_id) }}"
+                                    class="m-0">
+                                    <button type="submit" class="btn btn-sm btn-success shadow-sm"
+                                        title="Approve & Generate"><i class="bi bi-check-lg"></i> Approve</button>
+                                </form>
+                                <button class="btn btn-sm btn-outline-danger shadow-sm" title="Reject"
+                                    onclick="showReject('{{ r.request_id }}')"><i class="bi bi-x-lg"></i>
+                                    Reject</button>
+                            </div>
+                            {% elif r.status == 'approved' and r.certificate_id %}
+                            <a href="{{ url_for('certificates_download', cert_id=r.certificate_id) }}" target="_blank"
+                                class="btn btn-sm btn-primary shadow-sm"><i class="bi bi-file-earmark-pdf me-1"></i>View
+                                LC</a>
+                            {% else %}
+                            <span class="text-muted-custom small fst-italic" title="{{ r.admin_note }}">{{
+                                (r.admin_note[:25] + '...') if r.admin_note and r.admin_note|length > 25 else
+                                (r.admin_note or '—') }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card card-soft">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-inbox fw-light text-muted-custom mb-3" style="font-size: 4rem;"></i>
+        <h4 class="fw-bold text-dark">No LC Requests</h4>
+        <p class="text-muted-custom mb-4">You have zero pending leaving certificate requests.<br>Students need a portal
+            account to submit requests.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Reject modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-danger fw-bold" id="rejectModalLabel"><i
+                        class="bi bi-x-circle-fill me-2"></i>Reject Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="rejectForm">
+                <div class="modal-body">
+                    <p class="text-muted-custom small mb-3">Optionally provide a reason. This will be shown to the
+                        student on their portal.</p>
+                    <div class="form-group">
+                        <label class="form-label fw-semibold text-muted-custom">Reason / Note</label>
+                        <textarea name="admin_note" class="form-control" rows="3"
+                            placeholder="e.g. Dues not cleared, incomplete records…"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showReject(id) {
+        document.getElementById('rejectForm').action = '/requests/' + id + '/reject';
+        const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        rejectModal.show();
+    }
+</script>
+<style>
+    .hover-text-primary:hover {
+        color: var(--bs-primary) !important;
+        text-decoration: underline !important;
+    }
+</style>
+{% endblock %}

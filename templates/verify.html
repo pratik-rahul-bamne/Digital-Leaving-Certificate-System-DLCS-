@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Verify Certificate{% endblock %}
+{% block content %}
+<div class="verify-page">
+    {% if valid %}
+    <div class="verify-card verify-valid">
+        <div class="verify-icon">✅</div>
+        <h1 class="verify-title">Certificate Verified</h1>
+        <p class="verify-subtitle">This is an authentic leaving certificate issued by {{ config.COLLEGE_NAME if config
+            else "the college" }}.</p>
+
+        <div class="verify-info-grid">
+            <div class="verify-field">
+                <span class="verify-label">Certificate No.</span>
+                <span class="verify-value cert-badge">{{ cert.certificate_number }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Student Name</span>
+                <span class="verify-value">{{ student.name }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Father's Name</span>
+                <span class="verify-value">{{ student.father_name }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Course</span>
+                <span class="verify-value">{{ student.course }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Department</span>
+                <span class="verify-value">{{ student.department }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Year of Admission</span>
+                <span class="verify-value">{{ student.admission_year }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Year of Leaving</span>
+                <span class="verify-value">{{ student.leaving_year }}</span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Conduct</span>
+                <span class="verify-value">
+                    <span class="conduct-badge conduct-{{ student.conduct | lower | replace(' ','-') }}">
+                        {{ student.conduct }}
+                    </span>
+                </span>
+            </div>
+            <div class="verify-field">
+                <span class="verify-label">Issue Date</span>
+                <span class="verify-value">{{ cert.issue_date }}</span>
+            </div>
+        </div>
+        <p class="verify-footer">
+            🔒 This record was verified against the college's secure database in real-time.
+        </p>
+    </div>
+    {% else %}
+    <div class="verify-card verify-invalid">
+        <div class="verify-icon">❌</div>
+        <h1 class="verify-title">Certificate Not Found</h1>
+        <p class="verify-subtitle">
+            No record found for certificate number <strong>{{ cert_number }}</strong>.
+            This certificate may be invalid, forged, or the number may be incorrect.
+        </p>
+        <p class="verify-footer">
+            🔒 If you believe this is an error, please contact the college administration.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

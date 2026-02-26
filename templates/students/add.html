@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+{% block title %}Add Student{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">Add New Student</h1>
+        <p class="page-subtitle text-muted-custom">Register a new student into the college system</p>
+    </div>
+    <a href="{{ url_for('students_list') }}" class="btn btn-secondary-custom shadow-sm"><i
+            class="bi bi-arrow-left me-2"></i>Back to Directory</a>
+</div>
+
+<!-- Step Indicator -->
+<div class="card card-soft mb-4">
+    <div class="card-body py-4">
+        <div class="step-indicator">
+            <div class="step-item active">
+                <div class="step-circle">1</div>
+                <div class="step-label">Personal</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">2</div>
+                <div class="step-label">Academic</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">3</div>
+                <div class="step-label">Admission</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">4</div>
+                <div class="step-label">Gap Year</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">5</div>
+                <div class="step-label">Contact</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('students_add') }}" id="studentForm" enctype="multipart/form-data" novalidate>
+    <div class="row g-4">
+        <!-- Card 1: Personal Details -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step1">
+                <div class="card-header card-header-soft"><i class="bi bi-person me-2 text-primary"></i>Personal Details
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Full Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Pratik Sharma"
+                                required value="{{ request.form.get('name', '') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Father's Name</label>
+                            <input type="text" name="father_name" class="form-control" placeholder="e.g. Ramesh Sharma"
+                                required value="{{ request.form.get('father_name', '') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Mother's Name</label>
+                            <input type="text" name="mother_name" class="form-control" placeholder="e.g. Sunita Sharma"
+                                value="{{ request.form.get('mother_name', '') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">— Select —</option>
+                                <option value="Male" {% if request.form.get('gender')=='Male' %}selected{% endif %}>Male
+                                </option>
+                                <option value="Female" {% if request.form.get('gender')=='Female' %}selected{% endif %}>
+                                    Female</option>
+                                <option value="Other" {% if request.form.get('gender')=='Other' %}selected{% endif %}>
+                                    Other</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted-custom required">Date of Birth</label>
+                            <div class="row g-2">
+                                <div class="col">
+                                    <select name="dob_date" class="form-select" required>
+                                        <option value="">Date</option>
+                                        {% for d in range(1, 32) %}
+                                        {% set dval = '%02d' % d %}
+                                        <option value="{{ dval }}" {% if request.form.get('dob_date')==dval %}selected{%
+                                            endif %}>{{ dval }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select name="dob_month" class="form-select" required>
+                                        <option value="">Month</option>
+                                        {% for m, name in
+                                        [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),(7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')]
+                                        %}
+                                        {% set mval = '%02d' % m %}
+                                        <option value="{{ mval }}" {% if request.form.get('dob_month')==mval
+                                            %}selected{% endif %}>{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select name="dob_year" class="form-select" required>
+                                        <option value="">Year</option>
+                                        {% for y in range(1980, 2026)|reverse %}
+                                        <option value="{{ y }}" {% if request.form.get('dob_year')==y|string
+                                            %}selected{% endif %}>{{ y }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Academic Information -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step2">
+                <div class="card-header card-header-soft"><i class="bi bi-book me-2 text-primary"></i>Academic
+                    Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Course</label>
+                            <select name="course" class="form-select" required>
+                                <option value="">— Select Course —</option>
+                                <option value="B.Tech" {% if request.form.get('course')=='B.Tech' %}selected{% endif %}>
+                                    B.Tech</option>
+                                <option value="MCA" {% if request.form.get('course')=='MCA' %}selected{% endif %}>MCA
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Department</label>
+                            <select name="department" id="department" class="form-select" required
+                                onchange="toggleOtherDept()">
+                                <option value="">— Select Department —</option>
+                                <option value="CSE" {% if request.form.get('department')=='CSE' %}selected{% endif %}>
+                                    CSE</option>
+                                <option value="IT" {% if request.form.get('department')=='IT' %}selected{% endif %}>IT
+                                </option>
+                                <option value="AI & DS" {% if request.form.get('department')=='AI & DS' %}selected{%
+                                    endif %}>AI & DS</option>
+                                <option value="E&TC" {% if request.form.get('department')=='E&TC' %}selected{% endif %}>
+                                    E&TC</option>
+                                <option value="MECH" {% if request.form.get('department')=='MECH' %}selected{% endif %}>
+                                    MECH</option>
+                                <option value="CIVIL" {% if request.form.get('department')=='CIVIL' %}selected{% endif
+                                    %}>CIVIL</option>
+                                <option value="Other" {% if request.form.get('department')=='Other' %}selected{% endif
+                                    %}>Other</option>
+                            </select>
+                            <input type="text" name="other_department" id="other_department" class="form-control mt-2"
+                                placeholder="Specify Department" style="display:none;"
+                                value="{{ request.form.get('other_department','') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Admission & Passing Details -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step3">
+                <div class="card-header card-header-soft"><i
+                        class="bi bi-calendar-check me-2 text-primary"></i>Admission & Passing Details</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Year of Admission</label>
+                            <input type="number" name="admission_year" id="admission_year" class="form-control"
+                                placeholder="e.g. 2021" min="2000" max="2099" required
+                                value="{{ request.form.get('admission_year', '') }}"
+                                onchange="calculatePassingYear()" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Admission Type</label>
+                            <select name="admission_type" id="admission_type" class="form-select" required
+                                onchange="calculatePassingYear()">
+                                <option value="First Year" {% if request.form.get('admission_type')=='First Year'
+                                    %}selected{% endif %}>First Year</option>
+                                <option value="Direct Second Year" {% if
+                                    request.form.get('admission_type')=='Direct Second Year' %}selected{% endif %}>
+                                    Direct Second Year</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Passing Year</label>
+                            <input type="number" name="passing_year" id="passing_year" class="form-control bg-light"
+                                readonly required value="{{ request.form.get('passing_year', '') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Year of Leaving</label>
+                            <input type="number" name="leaving_year" class="form-control" placeholder="e.g. 2024"
+                                min="2000" max="2099" required value="{{ request.form.get('leaving_year', '') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Date of Leaving</label>
+                            <input type="date" name="leaving_date" class="form-control"
+                                value="{{ request.form.get('leaving_date', '') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Conduct</label>
+                            <select name="conduct" class="form-select">
+                                {% for c in ['Good', 'Excellent', 'Satisfactory', 'Below Average'] %}
+                                <option value="{{ c }}" {% if request.form.get('conduct', 'Good' )==c %}selected{% endif
+                                    %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom">Academic Status</label>
+                            <select name="academic_status" class="form-select">
+                                {% for a in ['Regular', 'Pass', 'Fail', 'Detained', 'Rusticated'] %}
+                                <option value="{{ a }}" {% if request.form.get('academic_status', 'Regular' )==a
+                                    %}selected{% endif %}>{{ a }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold text-muted-custom">Reason for Leaving</label>
+                            <textarea name="reason_for_leaving" class="form-control" rows="2"
+                                placeholder="e.g. Course completed, Transfer, etc.">{{ request.form.get('reason_for_leaving', '') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Gap Year -->
+        <div class="col-12">
+            <div class="card card-soft h-100 border-warning border-opacity-25" id="step4">
+                <div class="card-header card-header-soft bg-warning bg-opacity-10 text-dark"><i
+                        class="bi bi-hourglass-split me-2 text-warning"></i>Gap Year Information</div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" name="gap_year_applicable"
+                            id="gap_year_applicable" value="1" onchange="toggleGapYear()" {% if
+                            request.form.get('gap_year_applicable') %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold text-muted-custom ms-2" for="gap_year_applicable">Gap
+                            Year Applicable</label>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6" id="gap_years_group" style="display:none;">
+                            <label class="form-label fw-semibold text-muted-custom required">Number of Gap Years</label>
+                            <input type="number" name="gap_years" id="gap_years" class="form-control" min="1"
+                                value="{{ request.form.get('gap_years','') }}" />
+                        </div>
+                        <div class="col-md-6" id="gap_certificate_group" style="display:none;">
+                            <label class="form-label fw-semibold text-muted-custom required">Gap Certificate
+                                (PDF/JPG/PNG, Max 2MB)</label>
+                            <input type="file" name="gap_certificate" id="gap_certificate" class="form-control"
+                                accept=".pdf,.jpg,.jpeg,.png" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5: Contact Information -->
+        <div class="col-12">
+            <div class="card card-soft h-100" id="step5">
+                <div class="card-header card-header-soft"><i
+                        class="bi bi-person-lines-fill me-2 text-primary"></i>Contact Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="your@email.com" required
+                                value="{{ request.form.get('email','') }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted-custom required">Phone</label>
+                            <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number"
+                                pattern="^\d{10}$" required value="{{ request.form.get('phone','') }}" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted-custom">Address</label>
+                            <textarea name="address" class="form-control" rows="2"
+                                placeholder="Full address…">{{ request.form.get('address', '') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-soft mt-3 bg-light border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="text-muted-custom small"><i class="bi bi-info-circle me-1"></i>Ensure all required fields
+                marked with * are filled.</span>
+            <div>
+                <a href="{{ url_for('students_list') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-2"></i>Save Student
+                    Record</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function calculatePassingYear() {
+        const adminYear = parseInt(document.getElementById('admission_year').value);
+        const adminType = document.getElementById('admission_type').value;
+        const passingYearInput = document.getElementById('passing_year');
+        if (adminYear) {
+            if (adminType === 'First Year') {
+                passingYearInput.value = adminYear + 4;
+            } else if (adminType === 'Direct Second Year') {
+                passingYearInput.value = adminYear + 3;
+            }
+        } else {
+            passingYearInput.value = '';
+        }
+    }
+
+    function toggleGapYear() {
+        const isChecked = document.getElementById('gap_year_applicable').checked;
+        const gapYearsGroup = document.getElementById('gap_years_group');
+        const gapCertGroup = document.getElementById('gap_certificate_group');
+        const gapYears = document.getElementById('gap_years');
+        const gapCert = document.getElementById('gap_certificate');
+        if (isChecked) {
+            gapYearsGroup.style.display = 'block';
+            gapCertGroup.style.display = 'block';
+            gapYears.required = true;
+            gapCert.required = true;
+        } else {
+            gapYearsGroup.style.display = 'none';
+            gapCertGroup.style.display = 'none';
+            gapYears.required = false;
+            gapCert.required = false;
+            gapYears.value = '';
+            gapCert.value = '';
+        }
+    }
+
+    function toggleOtherDept() {
+        const dept = document.getElementById('department').value;
+        const otherDept = document.getElementById('other_department');
+        if (dept === 'Other') {
+            otherDept.style.display = 'block';
+            otherDept.required = true;
+        } else {
+            otherDept.style.display = 'none';
+            otherDept.required = false;
+            otherDept.value = '';
+        }
+    }
+
+    // Scroll Spy for Step Indicator
+    const sections = ['step1', 'step2', 'step3', 'step4', 'step5'];
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const el = document.getElementById(section);
+            if (el) {
+                const sectionTop = el.offsetTop - 150;
+                if (pageYOffset >= sectionTop) {
+                    current = section;
+                }
+            }
+        });
+
+        const stepItems = document.querySelectorAll('.step-item');
+        stepItems.forEach((item, index) => {
+            if (current === `step${index + 1}`) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Edge case for top
+        if (pageYOffset < 100) {
+            stepItems.forEach(i => i.classList.remove('active'));
+            stepItems[0].classList.add('active');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        calculatePassingYear();
+        toggleGapYear();
+        toggleOtherDept();
+    });
+</script>
+<style>
+    .required::after {
+        content: ' *';
+        color: #ef4444;
+    }
+</style>
+{% endblock %}
