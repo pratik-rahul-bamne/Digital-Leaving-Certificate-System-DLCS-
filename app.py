@@ -799,6 +799,13 @@ def registrations_list():
     )
     return render_template("registrations/list.html", regs=regs or [])
 
+@app.route("/registrations/<int:reg_id>")
+@login_required
+def registrations_view(reg_id):
+    reg = database.query("SELECT * FROM student_registrations WHERE reg_id = %s", (reg_id,), fetchone=True)
+    if not reg:
+        abort(404)
+    return render_template("registrations/view.html", reg=reg)
 
 @app.route("/registrations/<int:reg_id>/approve", methods=["POST"])
 @login_required

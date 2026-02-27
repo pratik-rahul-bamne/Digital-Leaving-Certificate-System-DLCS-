@@ -66,6 +66,9 @@
                         <td class="text-end pe-4">
                             {% if r.status == 'pending' %}
                             <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ url_for('registrations_view', reg_id=r.reg_id) }}"
+                                    class="btn btn-sm btn-info shadow-sm text-white" title="View Details"><i
+                                        class="bi bi-eye"></i> View</a>
                                 <form method="POST" action="{{ url_for('registrations_approve', reg_id=r.reg_id) }}"
                                     class="m-0">
                                     <button type="submit" class="btn btn-sm btn-success shadow-sm"><i
@@ -75,11 +78,20 @@
                                     onclick="showRegReject('{{ r.reg_id }}')"><i class="bi bi-x-lg"></i> Reject</button>
                             </div>
                             {% elif r.status == 'rejected' and r.admin_note %}
-                            <span class="text-muted-custom small fst-italic" title="{{ r.admin_note }}"><i
-                                    class="bi bi-info-circle me-1"></i>{{ (r.admin_note[:25] + '...') if
-                                r.admin_note|length > 25 else r.admin_note }}</span>
+                            <div class="d-flex justify-content-end gap-2 align-items-center">
+                                <span class="text-muted-custom small fst-italic me-2" title="{{ r.admin_note }}"><i
+                                        class="bi bi-info-circle me-1"></i>{{ (r.admin_note[:25] + '...') if
+                                    r.admin_note|length > 25 else r.admin_note }}</span>
+                                <a href="{{ url_for('registrations_view', reg_id=r.reg_id) }}"
+                                    class="btn btn-sm btn-outline-info shadow-sm" title="View Details"><i
+                                        class="bi bi-eye"></i> View</a>
+                            </div>
                             {% else %}
-                            <span class="text-muted-custom">—</span>
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ url_for('registrations_view', reg_id=r.reg_id) }}"
+                                    class="btn btn-sm btn-outline-info shadow-sm" title="View Details"><i
+                                        class="bi bi-eye"></i> View</a>
+                            </div>
                             {% endif %}
                         </td>
                     </tr>

@@ -39,7 +39,7 @@
     </div>
 </div>
 
-<form method="POST" id="studentForm" enctype="multipart/form-data" novalidate>
+<form method="POST" id="studentForm" enctype="multipart/form-data">
     <div class="row g-4">
         <!-- Card 1: Personal Details -->
         <div class="col-12">
@@ -302,20 +302,20 @@
 
 <script>
     function calculatePassingYear() {
-        const adminYear = parseInt(document.getElementById('admission_year').value);
-        const adminType = document.getElementById('admission_type').value;
+        const admissionYear = parseInt(document.getElementById('admission_year').value);
+        const admissionType = document.getElementById('admission_type').value;
         const passingYearInput = document.getElementById('passing_year');
         const isGapApplicable = document.getElementById('gap_year_applicable').checked;
         const gapYears = isGapApplicable ? (parseInt(document.getElementById('gap_years').value) || 1) : 0;
 
-        if (adminYear) {
+        if (admissionYear) {
             let duration = 0;
-            if (adminType === 'First Year') {
+            if (admissionType === 'First Year') {
                 duration = 4;
-            } else if (adminType === 'Direct Second Year') {
+            } else if (admissionType === 'Direct Second Year') {
                 duration = 3;
             }
-            passingYearInput.value = adminYear + duration + gapYears;
+            passingYearInput.value = admissionYear + duration + gapYears;
         } else {
             passingYearInput.value = '';
         }
@@ -341,6 +341,7 @@
         gapCertGroup.style.display = 'none';
         gapYears.required = false;
         gapCert.required = false;
+        gapCert.value = '';
     }
     calculatePassingYear();
     }
@@ -366,7 +367,7 @@
             const el = document.getElementById(section);
             if (el) {
                 const sectionTop = el.offsetTop - 150;
-                if (pageYOffset >= sectionTop) {
+                if (window.scrollY >= sectionTop) {
                     current = section;
                 }
             }
@@ -381,7 +382,7 @@
             }
         });
 
-        if (pageYOffset < 100) {
+        if (window.scrollY < 100) {
             stepItems.forEach(i => i.classList.remove('active'));
             stepItems[0].classList.add('active');
         }
