@@ -13,6 +13,8 @@ from flask import (
     Flask, render_template, request, redirect, url_for,
     session, flash, send_file, abort, jsonify
 )
+import string
+import random
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 
@@ -130,6 +132,41 @@ def logout():
     session.clear()
     flash("You have been logged out.", "info")
     return redirect(url_for("student_login"))
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        role = request.form.get("role", "student")
+        username = request.form.get("username", "").strip()
+        
+        new_pwd = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        hashed = generate_password_hash(new_pwd)
+        
+        if role == "student":
+            user = database.query("SELECT id, email FROM student_users WHERE username = %s", (username,), fetchone=True)
+            if user:
+                database.query("UPDATE student_users SET password_hash = %s WHERE id = %s", (hashed, user["id"]), commit=True)
+                if user.get("email"):
+                    send_email(
+                        to=user["email"],
+                        subject="DLCS - Password Reset",
+                        body_html=f"<p>Hello,</p><p>Your student portal password has been reset. Your new temporary password is: <strong>{new_pwd}</strong></p><p>Please log in.</p>"
+                    )
+                    flash("Password reset! Check your email for the new password.", "success")
+                else:
+                    flash(f"Password reset! Your temporary password is: {new_pwd} (No email on file)", "success")
+                return redirect(url_for('student_login'))
+            else:
+                flash("Student username not found.", "danger")
+        elif role == "admin":
+            user = database.query("SELECT id FROM admin_users WHERE username = %s", (username,), fetchone=True)
+            if user:
+                database.query("UPDATE admin_users SET password_hash = %s WHERE id = %s", (hashed, user["id"]), commit=True)
+                flash(f"Admin password reset! Your temporary password is: {new_pwd}", "success")
+                return redirect(url_for('login'))
+            else:
+                flash("Admin username not found.", "danger")
+    return render_template("forgot_password.html")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

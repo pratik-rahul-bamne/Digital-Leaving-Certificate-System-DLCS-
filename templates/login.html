@@ -31,6 +31,12 @@
             <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" id="loginBtn">
                 <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
             </button>
+            <div class="text-center mt-3 d-flex justify-content-between">
+                <a href="{{ url_for('forgot_password') }}" class="text-decoration-none text-muted-custom small"><i
+                        class="bi bi-key me-1"></i>Forgot Password?</a>
+                <a href="{{ url_for('student_login') }}" class="text-decoration-none text-muted-custom small"><i
+                        class="bi bi-person-badge-fill me-1"></i>Student Portal Login</a>
+            </div>
         </form>
     </div>
 </div>

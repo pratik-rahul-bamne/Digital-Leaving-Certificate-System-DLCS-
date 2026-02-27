@@ -244,7 +244,7 @@
                                 <label class="form-label fw-semibold text-muted-custom required">Number of Gap
                                     Years</label>
                                 <input type="number" name="gap_years" id="gap_years" class="form-control" min="1"
-                                    value="{{ request.form.get('gap_years','') }}" />
+                                    value="{{ request.form.get('gap_years','') }}" oninput="calculatePassingYear()" />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold text-muted-custom required">Gap Certificate
@@ -327,12 +327,17 @@
         const adminYear = parseInt(document.getElementById('admission_year').value);
         const adminType = document.getElementById('admission_type').value;
         const passingYearInput = document.getElementById('passing_year');
+        const isGapApplicable = document.getElementById('gap_year_applicable').checked;
+        const gapYears = isGapApplicable ? (parseInt(document.getElementById('gap_years').value) || 1) : 0;
+        
         if (adminYear) {
+            let duration = 0;
             if (adminType === 'First Year') {
-                passingYearInput.value = adminYear + 4;
+                duration = 4;
             } else if (adminType === 'Direct Second Year') {
-                passingYearInput.value = adminYear + 3;
+                duration = 3;
             }
+            passingYearInput.value = adminYear + duration + gapYears;
         } else {
             passingYearInput.value = '';
         }
@@ -348,11 +353,13 @@
             gapFields.style.display = 'flex';
             gapYears.required = true;
             gapCert.required = true;
+            if (!gapYears.value) gapYears.value = 1;
         } else {
             gapFields.style.display = 'none';
             gapYears.required = false;
             gapCert.required = false;
         }
+        calculatePassingYear();
     }
 
     function toggleOtherDept() {
