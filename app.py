@@ -23,7 +23,11 @@ import db as database
 from pdf_generator import generate_certificate_pdf
 
 app = Flask(__name__)
-app.secret_key = config.SECRET_KEY
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_secret_key")
+
+# Admin Creds (fallback to environ if desired)
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB limit
@@ -894,4 +898,5 @@ def forbidden(e):
 # ═══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     init_app()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=True, host="0.0.0.0", port=port)

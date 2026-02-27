@@ -15,7 +15,8 @@ PRINCIPAL_NAME = os.getenv("PRINCIPAL_NAME", "Dr. P. R. Bamane")
 # Base URL used to build QR verification links (no trailing slash)
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://127.0.0.1:5000")
 
-SQLITE_PATH = os.path.join(os.path.dirname(__file__), "lc.db")
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+SQLITE_PATH = os.path.join(BASE_DIR, "lc.db")
 
 # Email config
 MAIL_ENABLED        = os.getenv("MAIL_ENABLED", "false").lower() == "true"
