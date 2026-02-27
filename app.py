@@ -25,6 +25,9 @@ from pdf_generator import generate_certificate_pdf
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_secret_key")
 
+# TEMPORARY DEBUG FLAG FOR RAILWAY
+app.config["DEBUG"] = True
+
 # Admin Creds (fallback to environ if desired)
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
@@ -111,6 +114,10 @@ def index():
     if "admin_id" in session:
         return redirect(url_for("dashboard"))
     return redirect(url_for("student_login"))
+
+@app.route("/test")
+def test():
+    return "App Working ✅"
 
 
 @app.route("/login", methods=["GET", "POST"])
