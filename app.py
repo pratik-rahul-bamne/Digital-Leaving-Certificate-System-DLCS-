@@ -97,6 +97,9 @@ def init_app():
         )
 
 
+# Initialize the database immediately so it works with Gunicorn
+init_app()
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  ADMIN AUTH
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -897,6 +900,5 @@ def forbidden(e):
 #  ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    init_app()
     port = int(os.environ.get("PORT", 8080))
     app.run(debug=True, host="0.0.0.0", port=port)
