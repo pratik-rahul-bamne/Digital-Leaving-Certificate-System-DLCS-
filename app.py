@@ -52,7 +52,12 @@ limiter = Limiter(
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
-app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+# Vercel serverless has a read-only filesystem everywhere except /tmp.
+# Use /tmp/uploads when running on Vercel, static/uploads locally.
+if os.environ.get("VERCEL"):
+    app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+else:
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB limit
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 # Fix #7: map extension → expected Pillow format for magic-bytes verification
