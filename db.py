@@ -102,6 +102,16 @@ def init_db():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )""")
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    log_id SERIAL PRIMARY KEY,
+                    action VARCHAR(100) NOT NULL,
+                    admin_id INT,
+                    student_id INT,
+                    certificate_id INT,
+                    ip_address VARCHAR(50),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""")
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS student_users (
                     id SERIAL PRIMARY KEY,
                     student_id INT UNIQUE REFERENCES students(student_id),
@@ -165,6 +175,16 @@ def init_db():
                     certificate_number TEXT UNIQUE NOT NULL,
                     issue_date TEXT NOT NULL DEFAULT (date('now')),
                     generated_by TEXT,
+                    created_at TEXT DEFAULT (datetime('now'))
+                );
+
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    action TEXT NOT NULL,
+                    admin_id INTEGER,
+                    student_id INTEGER,
+                    certificate_id INTEGER,
+                    ip_address TEXT,
                     created_at TEXT DEFAULT (datetime('now'))
                 );
 
@@ -233,6 +253,13 @@ def _migrate_sqlite(conn):
     is a no-op if the column already exists — we catch the IntegrityError /
     OperationalError so each migration is safe to run repeatedly.
     """
+    # Fix #6: Allowlist tables and columns — never interpolate user-supplied input
+    _ALLOWED_TABLES = {
+        "students", "certificates", "student_registrations",
+        "student_users", "lc_requests", "audit_logs", "admin_users",
+    }
+    _ALLOWED_COLUMN_RE = __import__("re").compile(r"^[a-z_][a-z0-9_]*$")
+
     migrations = [
         # students — new columns added in v2
         ("students", "mother_name",        "TEXT"),
@@ -257,11 +284,14 @@ def _migrate_sqlite(conn):
         ("student_registrations", "gap_certificate_path", "TEXT"),
         # certificates
         ("certificates", "generated_by",   "TEXT"),
-        # new tables are created fresh via CREATE TABLE IF NOT EXISTS above,
-        # so no ALTER needed for student_users, lc_requests, student_registrations
     ]
     cur = conn.cursor()
     for table, column, col_def in migrations:
+        # Fix #6: guard — skip any entry that doesn't pass the allowlist
+        if table not in _ALLOWED_TABLES:
+            raise ValueError(f"_migrate_sqlite: table '{table}' not in allowlist")
+        if not _ALLOWED_COLUMN_RE.match(column):
+            raise ValueError(f"_migrate_sqlite: column '{column}' failed regex check")
         try:
             cur.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_def}")
             conn.commit()
@@ -282,3 +312,21 @@ def next_cert_number(conn, db_type):
         cur.execute("SELECT COUNT(*) FROM certificates")
         count = cur.fetchone()[0]
         return f"LC-{1001 + count}"
+
+
+def log_action(action: str, admin_id=None, student_id=None, certificate_id=None, ip=None):
+    """
+    Write a row to audit_logs.
+    Call this whenever a certificate is generated, a request is approved/rejected,
+    a registration is approved/rejected, or an admin logs in.
+    Errors are suppressed so a logging failure never breaks the main request.
+    """
+    try:
+        query(
+            """INSERT INTO audit_logs (action, admin_id, student_id, certificate_id, ip_address)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (action, admin_id, student_id, certificate_id, ip),
+            commit=True,
+        )
+    except Exception:
+        pass  # Logging must never crash the app

@@ -2,6 +2,7 @@
 PDF Certificate Generator — v2 with QR Code verification
 Uses ReportLab + qrcode + Pillow
 """
+import re
 from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -19,12 +20,26 @@ from PIL import Image as PILImage
 
 from config import COLLEGE_NAME, COLLEGE_ADDRESS, PRINCIPAL_NAME, APP_BASE_URL
 
+
 NAVY   = HexColor("#1a237e")
 GOLD   = HexColor("#b8860b")
 LTGRAY = HexColor("#f5f5f5")
 MDGRAY = HexColor("#9e9e9e")
 BLACK  = HexColor("#212121")
 
+
+def _sanitize(text) -> str:
+    """Strip HTML tags and control characters from user-supplied text before
+    rendering in a ReportLab Paragraph. This prevents HTML/script injection
+    in generated PDFs."""
+    if not text:
+        return ""
+    text = str(text)
+    # Remove HTML/XML tags
+    text = re.sub(r"<[^>]+>", "", text)
+    # Remove non-printable control characters (except newline/tab)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    return text.strip()
 
 def _make_qr_image(cert_number: str) -> BytesIO:
     """Generate a QR code pointing to the public verification URL."""
@@ -132,25 +147,25 @@ def generate_certificate_pdf(student: dict, certificate: dict) -> bytes:
 
     # ── Student info table ──────────────────────────────────────────────────
     info_rows = [
-        ("Full Name",          student.get("name", "")),
-        ("Father's Name",      student.get("father_name", "")),
-        ("Mother's Name",      student.get("mother_name") or "—"),
+        ("Full Name",          _sanitize(student.get("name", ""))),
+        ("Father's Name",      _sanitize(student.get("father_name", ""))),
+        ("Mother's Name",      _sanitize(student.get("mother_name")) or "—"),
         ("Date of Birth",      fmt_date(student.get("dob"))),
-        ("Gender",             student.get("gender") or "—"),
-        ("Email Address",      student.get("email") or "—"),
-        ("Mobile Number",      student.get("phone") or "—"),
-        ("Course",             student.get("course", "")),
-        ("Department",         student.get("department", "")),
-        ("Year of Admission",  str(student.get("admission_year", ""))),
-        ("Passing Year",       str(student.get("passing_year", "")) if student.get("passing_year") else "—"),
-        ("Year of Leaving",    str(student.get("leaving_year", ""))),
+        ("Gender",             _sanitize(student.get("gender")) or "—"),
+        ("Email Address",      _sanitize(student.get("email")) or "—"),
+        ("Mobile Number",      _sanitize(student.get("phone")) or "—"),
+        ("Course",             _sanitize(student.get("course", ""))),
+        ("Department",         _sanitize(student.get("department", ""))),
+        ("Year of Admission",  _sanitize(str(student.get("admission_year", "")))),
+        ("Passing Year",       _sanitize(str(student.get("passing_year", ""))) if student.get("passing_year") else "—"),
+        ("Year of Leaving",    _sanitize(str(student.get("leaving_year", "")))),
         ("Date of Leaving",    fmt_date(student.get("leaving_date"))),
-        ("Reason for Leaving", student.get("reason_for_leaving") or "—"),
-        ("Conduct",            student.get("conduct", "Good")),
-        ("Academic Status",    student.get("academic_status", "Regular")),
+        ("Reason for Leaving", _sanitize(student.get("reason_for_leaving")) or "—"),
+        ("Conduct",            _sanitize(student.get("conduct", "Good"))),
+        ("Academic Status",    _sanitize(student.get("academic_status", "Regular"))),
     ]
     if student.get("gap_year_applicable"):
-        info_rows.append(("Gap Years", str(student.get("gap_years", ""))))
+        info_rows.append(("Gap Years", _sanitize(str(student.get("gap_years", "")))))
     table_data = [[Paragraph(lb, label_style), Paragraph(f"  :  {vl}", value_style)]
                   for lb, vl in info_rows]
     info_table = Table(table_data, colWidths=["38%", "62%"])
@@ -197,10 +212,27 @@ def generate_certificate_pdf(student: dict, certificate: dict) -> bytes:
 
     sign_path = os.path.join(base_dir, "static", "img", "principal_sign.png")
     if os.path.exists(sign_path):
-        sign_img = RLImage(sign_path, width=3*cm, height=1.5*cm)
-        principal_cell = [sign_img, Paragraph(f"Principal<br/><font size='9' color='grey'>{PRINCIPAL_NAME}</font>", sig_style)]
+        # Preserve transparency: composite onto white before handing to ReportLab
+        from PIL import Image as _PILImg
+        _sig_pil = _PILImg.open(sign_path).convert("RGBA")
+        _white   = _PILImg.new("RGBA", _sig_pil.size, (255, 255, 255, 255))
+        _white.paste(_sig_pil, mask=_sig_pil.split()[3])
+        _sig_buf = BytesIO()
+        _white.convert("RGB").save(_sig_buf, format="PNG")
+        _sig_buf.seek(0)
+        sign_img = RLImage(_sig_buf, width=4*cm, height=1.4*cm)
+        principal_cell = [
+            sign_img,
+            Paragraph(
+                f"Principal<br/><font size='9' color='grey'>{PRINCIPAL_NAME}</font>",
+                sig_style,
+            ),
+        ]
     else:
-        principal_cell = Paragraph(f"Principal<br/><font size='9' color='grey'>{PRINCIPAL_NAME}</font>", sig_style)
+        principal_cell = Paragraph(
+            f"Principal<br/><font size='9' color='grey'>{PRINCIPAL_NAME}</font>",
+            sig_style,
+        )
 
     seal_path = os.path.join(base_dir, "static", "img", "seal.png")
     if os.path.exists(seal_path):

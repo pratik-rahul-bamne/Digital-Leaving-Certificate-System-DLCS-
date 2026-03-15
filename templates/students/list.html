@@ -5,145 +5,236 @@
     <div>
         <h1 class="page-title">Students Directory</h1>
         <p class="page-subtitle text-muted-custom">{{ total_count }} student record{{ 's' if total_count != 1 }} found
+            {% if active_filters %}<span class="badge bg-warning text-dark ms-2"><i class="bi bi-funnel-fill me-1"></i>Filtered</span>{% endif %}
         </p>
     </div>
-    <a href="{{ url_for('students_add') }}" class="btn btn-primary shadow-sm"><i
-            class="bi bi-person-plus-fill me-2"></i>Add Student</a>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('students_add') }}" class="btn btn-primary shadow-sm"><i class="bi bi-person-plus-fill me-2"></i>Add Student</a>
+    </div>
 </div>
 
-<!-- Search Bar -->
+<!-- Search & Filters -->
 <div class="card card-soft mb-4">
     <div class="card-body py-3">
-        <form method="GET" class="row g-2 align-items-center">
-            <div class="col-md-8 col-sm-12 relative">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted-custom"><i
-                            class="bi bi-search"></i></span>
-                    <input type="text" name="q" id="searchInput" class="form-control border-start-0 ps-0"
-                        placeholder="Search by name, course, or department…" value="{{ search }}" />
+        <form method="GET" id="filterForm">
+            <!-- Search bar -->
+            <div class="row g-2 align-items-center mb-2">
+                <div class="col-md-9 col-sm-12">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted-custom"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" id="searchInput" class="form-control border-start-0 ps-0"
+                            placeholder="Search by name, course, or department…" value="{{ search }}" />
+                    </div>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-secondary-custom w-100">Search</button>
+                </div>
+                <div class="col-md-auto">
+                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advFilters">
+                        <i class="bi bi-funnel me-1"></i>Filters {% if active_filters %}<span class="badge bg-warning text-dark ms-1">ON</span>{% endif %}
+                    </button>
+                </div>
+                {% if search or active_filters %}
+                <div class="col-md-auto">
+                    <a href="{{ url_for('students_list') }}" class="btn btn-outline-secondary w-100">Clear All</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Advanced filter panel -->
+            <div class="collapse {% if active_filters %}show{% endif %}" id="advFilters">
+                <div class="border-top pt-3 mt-1">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted-custom mb-1">Department</label>
+                            <select name="dept" class="form-select form-select-sm">
+                                <option value="">All Departments</option>
+                                {% for d in depts %}
+                                <option value="{{ d.department }}" {% if f_dept == d.department %}selected{% endif %}>{{ d.department }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold text-muted-custom mb-1">Admission Year</label>
+                            <select name="adm_year" class="form-select form-select-sm">
+                                <option value="">Any</option>
+                                {% for y in adm_years %}
+                                <option value="{{ y.admission_year }}" {% if f_adm_year == (y.admission_year | string) %}selected{% endif %}>{{ y.admission_year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold text-muted-custom mb-1">Leaving Year</label>
+                            <select name="leave_year" class="form-select form-select-sm">
+                                <option value="">Any</option>
+                                {% for y in leave_years %}
+                                <option value="{{ y.leaving_year }}" {% if f_leave_year == (y.leaving_year | string) %}selected{% endif %}>{{ y.leaving_year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold text-muted-custom mb-1">Conduct</label>
+                            <select name="conduct" class="form-select form-select-sm">
+                                <option value="">Any</option>
+                                {% for c in ['Excellent','Good','Satisfactory','Poor'] %}
+                                <option value="{{ c }}" {% if f_conduct.lower() == c.lower() %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold text-muted-custom mb-1">Has Certificate</label>
+                            <select name="has_cert" class="form-select form-select-sm">
+                                <option value="">Any</option>
+                                <option value="yes" {% if f_has_cert == 'yes' %}selected{% endif %}>With Certificate</option>
+                                <option value="no" {% if f_has_cert == 'no' %}selected{% endif %}>No Certificate Yet</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Apply</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-auto col-sm-12">
-                <button type="submit" class="btn btn-secondary-custom w-100">Search</button>
-            </div>
-            {% if search %}
-            <div class="col-md-auto col-sm-12">
-                <a href="{{ url_for('students_list') }}" class="btn btn-outline-secondary w-100">Clear</a>
-            </div>
-            {% endif %}
         </form>
     </div>
 </div>
 
 {% if students %}
-<div class="card card-soft">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light-soft">
-                    <tr>
-                        <th class="ps-4">ID</th>
-                        <th>Student Name</th>
-                        <th>Course & Dept</th>
-                        <th>Admission</th>
-                        <th>Leaving</th>
-                        <th>Conduct</th>
-                        <th class="text-end pe-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in students %}
-                    <tr>
-                        <td class="ps-4 text-muted-custom fw-medium">#{{ s.student_id }}</td>
-                        <td>
-                            <div class="fw-bold text-dark">{{ s.name }}</div>
-                            <div class="small text-muted-custom">Father: {{ s.father_name }}</div>
-                        </td>
-                        <td>
-                            <div><span class="badge bg-primary bg-opacity-10 text-primary">{{ s.course }}</span></div>
-                            <div class="small text-muted-custom mt-1">{{ s.department }}</div>
-                        </td>
-                        <td>{{ s.admission_year }}</td>
-                        <td>{{ s.leaving_year }}</td>
-                        <td>
-                            {% if s.conduct == 'Excellent' or s.conduct == 'Good' %}
-                            <span
-                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">{{
-                                s.conduct }}</span>
-                            {% elif s.conduct == 'Satisfactory' %}
-                            <span
-                                class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 py-1 px-2">{{
-                                s.conduct }}</span>
-                            {% else %}
-                            <span
-                                class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 py-1 px-2">{{
-                                s.conduct }}</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-end pe-4">
-                            <div class="btn-group shadow-sm">
-                                <a href="{{ url_for('students_view', student_id=s.student_id) }}"
-                                    class="btn btn-sm btn-light text-primary border-primary border-opacity-25"
-                                    title="View Profile"><i class="bi bi-eye-fill"></i></a>
-                                <a href="{{ url_for('students_edit', student_id=s.student_id) }}"
-                                    class="btn btn-sm btn-light text-secondary border-secondary border-opacity-25"
-                                    title="Edit Record"><i class="bi bi-pencil-square"></i></a>
-                                <form method="POST" action="{{ url_for('students_delete', student_id=s.student_id) }}"
-                                    onsubmit="return confirmDelete('{{ s.name }}')" class="d-inline">
-                                    <button type="submit"
-                                        class="btn btn-sm btn-light text-danger border-danger border-opacity-25 rounded-end"
-                                        title="Delete"><i class="bi bi-trash-fill"></i></button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<form method="POST" action="{{ url_for('certificates_bulk_generate') }}" id="bulkForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Bulk action bar -->
+    <div class="d-flex justify-content-between align-items-center mb-2" id="bulkBar" style="display:none!important;">
+        <div class="small text-muted-custom"><span id="selectedCount">0</span> students selected</div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">Deselect All</button>
+            <button type="submit" class="btn btn-sm btn-success shadow-sm" id="bulkBtn" disabled>
+                <i class="bi bi-file-zip-fill me-1"></i>Generate & Download ZIP
+            </button>
         </div>
     </div>
 
-    <!-- Pagination -->
-    {% if total_pages > 1 %}
-    <div class="card-footer bg-white border-top-0 py-3">
-        <ul class="pagination pagination-sm justify-content-end mb-0">
-            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('students_list', page=page-1, q=search) }}"
-                    tabindex="-1">Previous</a>
-            </li>
-            {% for p in range(1, total_pages + 1) %}
-            <li class="page-item {% if p == page %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('students_list', page=p, q=search) }}">{{ p }}</a>
-            </li>
-            {% endfor %}
-            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('students_list', page=page+1, q=search) }}">Next</a>
-            </li>
-        </ul>
+    <div class="card card-soft">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light-soft">
+                        <tr>
+                            <th class="ps-4" style="width:40px;">
+                                <input type="checkbox" id="selectAll" class="form-check-input" onchange="toggleAll(this.checked)" title="Select all">
+                            </th>
+                            <th>ID</th>
+                            <th>Student Name</th>
+                            <th>Course &amp; Dept</th>
+                            <th>Admission</th>
+                            <th>Leaving</th>
+                            <th>Conduct</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                        <tr>
+                            <td class="ps-4">
+                                <input type="checkbox" name="student_ids" value="{{ s.student_id }}"
+                                    class="form-check-input student-check" onchange="updateBulkBar()">
+                            </td>
+                            <td class="text-muted-custom fw-medium">#{{ s.student_id }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ s.name }}</div>
+                                <div class="small text-muted-custom">Father: {{ s.father_name }}</div>
+                            </td>
+                            <td>
+                                <div><span class="badge bg-primary bg-opacity-10 text-primary">{{ s.course }}</span></div>
+                                <div class="small text-muted-custom mt-1">{{ s.department }}</div>
+                            </td>
+                            <td>{{ s.admission_year }}</td>
+                            <td>{{ s.leaving_year }}</td>
+                            <td>
+                                {% if s.conduct in ['Excellent','Good'] %}
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">{{ s.conduct }}</span>
+                                {% elif s.conduct == 'Satisfactory' %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 py-1 px-2">{{ s.conduct }}</span>
+                                {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 py-1 px-2">{{ s.conduct }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group shadow-sm">
+                                    <a href="{{ url_for('students_view', student_id=s.student_id) }}"
+                                        class="btn btn-sm btn-light text-primary border-primary border-opacity-25" title="View Profile"><i class="bi bi-eye-fill"></i></a>
+                                    <a href="{{ url_for('students_edit', student_id=s.student_id) }}"
+                                        class="btn btn-sm btn-light text-secondary border-secondary border-opacity-25" title="Edit Record"><i class="bi bi-pencil-square"></i></a>
+                                    <form method="POST" action="{{ url_for('students_delete', student_id=s.student_id) }}"
+                                        onsubmit="return confirmDelete('{{ s.name }}')" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit"
+                                            class="btn btn-sm btn-light text-danger border-danger border-opacity-25 rounded-end" title="Delete"><i class="bi bi-trash-fill"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="card-footer bg-white border-top-0 py-3">
+            <ul class="pagination pagination-sm justify-content-end mb-0">
+                <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('students_list', page=page-1, q=search, dept=f_dept, adm_year=f_adm_year, leave_year=f_leave_year, conduct=f_conduct, has_cert=f_has_cert) }}">Previous</a>
+                </li>
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('students_list', page=p, q=search, dept=f_dept, adm_year=f_adm_year, leave_year=f_leave_year, conduct=f_conduct, has_cert=f_has_cert) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('students_list', page=page+1, q=search, dept=f_dept, adm_year=f_adm_year, leave_year=f_leave_year, conduct=f_conduct, has_cert=f_has_cert) }}">Next</a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
+</form>
+
 {% else %}
 <div class="card card-soft">
     <div class="card-body text-center py-5">
         <i class="bi bi-people fw-light text-muted-custom mb-3" style="font-size: 4rem;"></i>
-        {% if search %}
+        {% if search or active_filters %}
         <h4 class="fw-bold text-dark">No matches found</h4>
-        <p class="text-muted-custom mb-4">We couldn't find any students matching "<strong>{{ search }}</strong>".</p>
-        <a href="{{ url_for('students_list') }}" class="btn btn-outline-secondary">Clear Search Filter</a>
+        <p class="text-muted-custom mb-4">Try adjusting your search or filter criteria.</p>
+        <a href="{{ url_for('students_list') }}" class="btn btn-outline-secondary">Clear All Filters</a>
         {% else %}
         <h4 class="fw-bold text-dark">No Students Registered</h4>
         <p class="text-muted-custom mb-4">Start by adding your very first student to the system.</p>
-        <a href="{{ url_for('students_add') }}" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Add
-            Student</a>
+        <a href="{{ url_for('students_add') }}" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Add Student</a>
         {% endif %}
     </div>
 </div>
 {% endif %}
 
 <script>
-    function confirmDelete(name) {
-        return confirm("Are you sure you want to permanently delete the record for " + name + "? This action cannot be undone.");
-    }
+function confirmDelete(name) {
+    return confirm("Are you sure you want to permanently delete the record for " + name + "? This action cannot be undone.");
+}
+function updateBulkBar() {
+    const checks = document.querySelectorAll('.student-check:checked');
+    const count = checks.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('bulkBtn').disabled = count === 0;
+    document.getElementById('bulkBar').style.display = count > 0 ? 'flex' : 'none';
+}
+function toggleAll(state) {
+    document.querySelectorAll('.student-check').forEach(c => c.checked = state);
+    document.getElementById('selectAll').checked = state;
+    updateBulkBar();
+}
+// show bulkBar if any checked on page load
+updateBulkBar();
 </script>
 {% endblock %}

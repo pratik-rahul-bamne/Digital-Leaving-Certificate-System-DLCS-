@@ -145,6 +145,7 @@
                 <div class="mt-auto d-flex gap-3 bg-light-soft p-3 rounded border">
                     <form method="POST" action="{{ url_for('registrations_approve', reg_id=reg.reg_id) }}"
                         class="flex-grow-1 m-0">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-success w-100 fw-bold py-2"><i
                                 class="bi bi-check-circle-fill me-2"></i>Approve Registration</button>
                     </form>
@@ -179,6 +180,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" id="regRejectForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-body">
                     <p class="text-muted-custom small mb-3">Optionally provide a reason. This will be stored for
                         reference and may be seen by the student if they try again.</p>

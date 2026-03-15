@@ -39,6 +39,7 @@
 </div>
 
 <form method="POST" action="{{ url_for('students_add') }}" id="studentForm" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row g-4">
         <!-- Card 1: Personal Details -->
         <div class="col-12">

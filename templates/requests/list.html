@@ -67,6 +67,7 @@
                             <div class="d-flex justify-content-end gap-2">
                                 <form method="POST" action="{{ url_for('requests_approve', request_id=r.request_id) }}"
                                     class="m-0">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-success shadow-sm"
                                         title="Approve & Generate"><i class="bi bi-check-lg"></i> Approve</button>
                                 </form>
@@ -112,15 +113,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" id="rejectForm">
-                <div class="modal-body">
-                    <p class="text-muted-custom small mb-3">Optionally provide a reason. This will be shown to the
-                        student on their portal.</p>
-                    <div class="form-group">
-                        <label class="form-label fw-semibold text-muted-custom">Reason / Note</label>
-                        <textarea name="admin_note" class="form-control" rows="3"
-                            placeholder="e.g. Dues not cleared, incomplete records…"></textarea>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-body">
+                        <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-warning small py-2 mb-3">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            This reason will be shown directly to the student on their portal.
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label fw-semibold text-muted-custom">Reason for Rejection <span class="text-danger">*</span></label>
+                            <textarea name="admin_note" class="form-control" rows="3"
+                                placeholder="e.g. Dues not cleared, incomplete records…" required></textarea>
+                        </div>
                     </div>
-                </div>
                 <div class="modal-footer border-top-0 pt-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Confirm Rejection</button>

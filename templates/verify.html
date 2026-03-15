@@ -1,72 +1,154 @@
-{% extends "base.html" %}
-{% block title %}Verify Certificate{% endblock %}
-{% block content %}
-<div class="verify-page">
-    {% if valid %}
-    <div class="verify-card verify-valid">
-        <div class="verify-icon">✅</div>
-        <h1 class="verify-title">Certificate Verified</h1>
-        <p class="verify-subtitle">This is an authentic leaving certificate issued by {{ config.COLLEGE_NAME if config
-            else "the college" }}.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Certificate — DLCS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f0f4ff; min-height: 100vh; display: flex; flex-direction: column; }
+    .verify-hero { background: linear-gradient(135deg, #1a56db 0%, #0e34a0 100%); padding: 3rem 1rem 6rem; color: white; text-align: center; }
+    .verify-hero h1 { font-size: 1.5rem; font-weight: 600; opacity: 0.9; }
+    .verify-hero p { opacity: 0.75; margin-bottom: 0; }
+    .verify-card-wrapper { margin-top: -4rem; padding: 0 1rem 3rem; }
+    .verify-card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    .verify-card-header {
+      padding: 2rem 2rem 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .verify-icon-wrap {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 2.5rem;
+    }
+    .verify-valid .verify-icon-wrap { background: #dcfce7; color: #16a34a; }
+    .verify-invalid .verify-icon-wrap { background: #fee2e2; color: #dc2626; }
+    .verify-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .verify-valid .verify-title { color: #15803d; }
+    .verify-invalid .verify-title { color: #b91c1c; }
+    .verify-subtitle { color: #6b7280; font-size: 0.95rem; }
+    .verify-body { padding: 1.5rem 2rem 2rem; }
+    .verify-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .verify-field { background: #f9fafb; border-radius: 0.75rem; padding: 0.875rem 1rem; }
+    .verify-label { display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; margin-bottom: 0.25rem; }
+    .verify-value { font-weight: 600; color: #111827; font-size: 0.95rem; }
+    .cert-number-badge {
+      display: inline-block; font-family: monospace; font-size: 1rem; font-weight: 700;
+      background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe;
+      padding: 0.25rem 0.875rem; border-radius: 999px;
+    }
+    .verify-footer-bar {
+      background: #f9fafb; border-top: 1px solid #f3f4f6;
+      padding: 1rem 2rem; text-align: center;
+      font-size: 0.8rem; color: #9ca3af;
+    }
+    .powered-badge { font-size: 0.75rem; color: #9ca3af; }
+    @media (max-width: 480px) { .verify-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
 
-        <div class="verify-info-grid">
-            <div class="verify-field">
-                <span class="verify-label">Certificate No.</span>
-                <span class="verify-value cert-badge">{{ cert.certificate_number }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Student Name</span>
-                <span class="verify-value">{{ student.name }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Father's Name</span>
-                <span class="verify-value">{{ student.father_name }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Course</span>
-                <span class="verify-value">{{ student.course }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Department</span>
-                <span class="verify-value">{{ student.department }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Year of Admission</span>
-                <span class="verify-value">{{ student.admission_year }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Year of Leaving</span>
-                <span class="verify-value">{{ student.leaving_year }}</span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Conduct</span>
-                <span class="verify-value">
-                    <span class="conduct-badge conduct-{{ student.conduct | lower | replace(' ','-') }}">
-                        {{ student.conduct }}
-                    </span>
-                </span>
-            </div>
-            <div class="verify-field">
-                <span class="verify-label">Issue Date</span>
-                <span class="verify-value">{{ cert.issue_date }}</span>
-            </div>
+  <!-- Hero -->
+  <div class="verify-hero">
+    <h1><i class="bi bi-shield-check me-2"></i>Certificate Verification</h1>
+    <p>Real-time verification against the college's secure database</p>
+  </div>
+
+  <!-- Card -->
+  <div class="verify-card-wrapper">
+    <div class="verify-card {% if valid %}verify-valid{% else %}verify-invalid{% endif %}">
+
+      {% if valid %}
+      <!-- VALID -->
+      <div class="verify-card-header">
+        <div class="verify-icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
+        <h2 class="verify-title">✅ Certificate Verified</h2>
+        <p class="verify-subtitle">This is an authentic document issued by <strong>{{ config.COLLEGE_NAME if config else "the college" }}</strong>.</p>
+        <div class="mt-2"><span class="cert-number-badge">{{ cert.certificate_number }}</span></div>
+      </div>
+      <div class="verify-body">
+        <div class="verify-grid">
+          <div class="verify-field">
+            <span class="verify-label">Student Name</span>
+            <span class="verify-value">{{ student.name }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Father's Name</span>
+            <span class="verify-value">{{ student.father_name }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Course</span>
+            <span class="verify-value">{{ student.course }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Department</span>
+            <span class="verify-value">{{ student.department }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Admission Year</span>
+            <span class="verify-value">{{ student.admission_year }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Leaving Year</span>
+            <span class="verify-value">{{ student.leaving_year }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Conduct</span>
+            <span class="verify-value">{{ student.conduct or '—' }}</span>
+          </div>
+          <div class="verify-field">
+            <span class="verify-label">Issue Date</span>
+            <span class="verify-value">{{ cert.issue_date }}</span>
+          </div>
         </div>
-        <p class="verify-footer">
-            🔒 This record was verified against the college's secure database in real-time.
-        </p>
-    </div>
-    {% else %}
-    <div class="verify-card verify-invalid">
-        <div class="verify-icon">❌</div>
-        <h1 class="verify-title">Certificate Not Found</h1>
+      </div>
+      <div class="verify-footer-bar">
+        <i class="bi bi-lock-fill me-1"></i>
+        Verified in real-time against the college database on {{ now if now else "today" }}.
+      </div>
+
+      {% else %}
+      <!-- INVALID -->
+      <div class="verify-card-header">
+        <div class="verify-icon-wrap"><i class="bi bi-x-circle-fill"></i></div>
+        <h2 class="verify-title">❌ Certificate Not Found</h2>
         <p class="verify-subtitle">
-            No record found for certificate number <strong>{{ cert_number }}</strong>.
-            This certificate may be invalid, forged, or the number may be incorrect.
+          No record found for certificate number <strong>{{ cert_number }}</strong>.<br>
+          This certificate may be invalid, forged, or the number may be incorrect.
         </p>
-        <p class="verify-footer">
-            🔒 If you believe this is an error, please contact the college administration.
-        </p>
+      </div>
+      <div class="verify-body text-center">
+        <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          If you believe this is an error, please contact the college administration directly.
+        </div>
+      </div>
+      <div class="verify-footer-bar">
+        <i class="bi bi-lock-fill me-1"></i>
+        This lookup was performed securely against the college database.
+      </div>
+      {% endif %}
+
     </div>
-    {% endif %}
-</div>
-{% endblock %}
+
+    <p class="text-center powered-badge mt-3">
+      <i class="bi bi-mortarboard-fill me-1"></i>
+      Powered by Digital Leaving Certificate System (DLCS)
+    </p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

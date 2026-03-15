@@ -37,6 +37,7 @@
     </div>
 
     <form method="POST" id="registerForm" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="row g-4">
             <!-- Card 1: Personal Details -->
             <div class="col-12">

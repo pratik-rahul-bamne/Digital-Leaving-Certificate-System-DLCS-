@@ -13,6 +13,7 @@
         </div>
 
         <form method="POST" id="loginForm" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
                 <label for="username" class="form-label fw-semibold text-muted-custom">Username</label>
                 <input type="text" id="username" name="username" class="form-control form-control-lg"

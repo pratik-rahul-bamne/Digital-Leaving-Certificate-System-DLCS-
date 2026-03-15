@@ -12,6 +12,7 @@
             class="btn btn-outline-secondary me-2"><i class="bi bi-pencil-square me-2"></i>Edit</a>
         <form method="POST" action="{{ url_for('students_delete', student_id=student.student_id) }}"
             onsubmit="return confirmDelete('{{ student.name }}')" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill me-2"></i>Delete</button>
         </form>
     </div>
@@ -132,6 +133,7 @@
                 {% if not has_portal %}
                 <form method="POST" action="{{ url_for('create_student_portal', student_id=student.student_id) }}"
                     class="mt-auto">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-outline-warning text-dark fw-medium w-100"><i
                             class="bi bi-person-check-fill me-2"></i>Create Portal Account</button>
                 </form>
@@ -164,6 +166,7 @@
                     </button>
                     <form method="POST" action="{{ url_for('certificates_generate', student_id=student.student_id) }}"
                         class="generate-pdf-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-primary w-100 fw-medium"><i
                                 class="bi bi-file-earmark-plus me-2"></i>Generate Leaving Certificate</button>
                     </form>

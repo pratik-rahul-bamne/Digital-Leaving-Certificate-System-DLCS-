@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Activity Log{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">Admin Activity Log</h1>
+        <p class="page-subtitle text-muted-custom">Full audit trail of all system actions</p>
+    </div>
+    <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">{{ total_count }} records</span>
+</div>
+
+<!-- Filters -->
+<div class="card card-soft mb-4">
+    <div class="card-body py-3">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold text-muted-custom mb-1">Action Type</label>
+                <select name="action" class="form-select form-select-sm">
+                    <option value="">All Actions</option>
+                    {% for a in action_types %}
+                    <option value="{{ a.action }}" {% if f_action == a.action %}selected{% endif %}>{{ a.action | replace('_', ' ') | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted-custom mb-1">Date From</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ f_date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted-custom mb-1">Date To</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ f_date_to }}">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary-custom btn-sm w-100">Filter</button>
+                <a href="{{ url_for('admin_audit_log') }}" class="btn btn-outline-secondary btn-sm w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card card-soft">
+    {% if logs %}
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light-soft">
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Action</th>
+                        <th>Admin ID</th>
+                        <th>Student ID</th>
+                        <th>Certificate ID</th>
+                        <th>IP Address</th>
+                        <th class="pe-4">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="ps-4 text-muted-custom">{{ log.log_id }}</td>
+                        <td>
+                            {% set action_colors = {
+                                'admin_login': 'primary',
+                                'cert_generated': 'success',
+                                'request_approved': 'success',
+                                'request_rejected': 'danger',
+                                'registration_approved': 'info',
+                                'registration_rejected': 'danger'
+                            } %}
+                            {% set color = action_colors.get(log.action, 'secondary') %}
+                            <span class="badge bg-{{ color }} bg-opacity-10 text-{{ color }} border border-{{ color }} border-opacity-25 px-2 py-1">
+                                <i class="bi bi-{% if 'login' in log.action %}person-check{% elif 'generated' in log.action %}file-earmark-plus{% elif 'approved' in log.action %}check-circle{% elif 'rejected' in log.action %}x-circle{% else %}activity{% endif %} me-1"></i>
+                                {{ log.action | replace('_', ' ') | title }}
+                            </span>
+                        </td>
+                        <td class="text-muted-custom">{{ log.admin_id or '—' }}</td>
+                        <td>
+                            {% if log.student_id %}
+                            <a href="{{ url_for('students_view', student_id=log.student_id) }}" class="text-primary fw-medium text-decoration-none">#{{ log.student_id }}</a>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="text-muted-custom">{{ log.certificate_id or '—' }}</td>
+                        <td class="text-muted-custom small font-monospace">{{ log.ip_address or '—' }}</td>
+                        <td class="pe-4 text-muted-custom small">{{ (log.created_at | string)[:19] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="card-footer bg-white border-top-0 py-3">
+        <ul class="pagination pagination-sm justify-content-end mb-0">
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('admin_audit_log', page=page-1, action=f_action, date_from=f_date_from, date_to=f_date_to) }}">Previous</a>
+            </li>
+            {% for p in range([1, page-2]|max, [total_pages+1, page+3]|min) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin_audit_log', page=p, action=f_action, date_from=f_date_from, date_to=f_date_to) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('admin_audit_log', page=page+1, action=f_action, date_from=f_date_from, date_to=f_date_to) }}">Next</a>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="card-body text-center py-5">
+        <i class="bi bi-journal-x text-muted-custom mb-3" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold text-dark">No Activity Logs Found</h5>
+        <p class="text-muted-custom mb-0">Actions will appear here once admins start using the system.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
